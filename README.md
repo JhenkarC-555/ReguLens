@@ -1,26 +1,71 @@
 # ReguLens — Evidence-Based RBI Regulatory Change Intelligence Using RAG
 
-> **Hackathon Track:** *From Text to Insight: Ask Your Documents*  
-> **Institution:** Global Academy of Technology — Department of AI & ML  
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=JhenkarC-555/ReguLens&branch=main&mainModule=app.py)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Streamlit 1.35+](https://img.shields.io/badge/Streamlit-1.35%2B-FF4B4B.svg)](https://streamlit.io/)
+[![FAISS](https://img.shields.io/badge/Vector%20Store-FAISS%20CPU-green.svg)](https://github.com/facebookresearch/faiss)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > **Product Name:** **ReguLens**  
 > **Subtitle:** Precision RBI Regulatory Change Intelligence & Grounded Question Answering  
+> **Repository:** [https://github.com/JhenkarC-555/ReguLens](https://github.com/JhenkarC-555/ReguLens)  
+> **One-Click Cloud Deployment:** Ready to host on [Streamlit Community Cloud](https://share.streamlit.io)  
+
+---
+
+## 🚀 Instant Deployment on Streamlit Community Cloud
+
+Deploying **ReguLens** takes under 2 minutes with zero infrastructure setup:
+
+### 1-Click Deploy
+[![Deploy to Streamlit Cloud](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=JhenkarC-555/ReguLens&branch=main&mainModule=app.py)
+
+### Step-by-Step Instructions
+
+1. **Log in to Streamlit Community Cloud:**  
+   Navigate to [share.streamlit.io](https://share.streamlit.io) and authenticate with your GitHub account (`JhenkarC-555`).
+
+2. **Create New Application:**  
+   Click the **"New app"** button in the top-right corner.
+
+3. **Configure Deployment Settings:**  
+   * **Repository:** `JhenkarC-555/ReguLens`
+   * **Branch:** `main`
+   * **Main file path:** `app.py`
+   * **App URL (optional):** Choose a custom subdomain (e.g. `regulens.streamlit.app`)
+
+4. **Advanced Settings (Optional - Secrets):**  
+   Under **Advanced settings** -> **Secrets**, you can optionally configure an external LLM endpoint:
+   ```toml
+   # Optional: Connect to external Ollama server (or leave blank to use fast Retrieval-Only mode)
+   OLLAMA_BASE_URL = "https://your-ollama-host.example.com"
+   ```
+   *(Note: ReguLens has built-in graceful fallback. If no external LLM is provided, the app runs in high-performance **Retrieval-Only & Citations Mode** without errors!)*
+
+5. **Deploy:**  
+   Click **Deploy!** Streamlit Community Cloud will automatically:
+   * Read [`.streamlit/config.toml`](file:///c:/New%20folder/.streamlit/config.toml) for server and theme settings.
+   * Read [`packages.txt`](file:///c:/New%20folder/packages.txt) to install required Linux C-libraries (`libgomp1`, `curl`).
+   * Read [`requirements.txt`](file:///c:/New%20folder/requirements.txt) to install Python dependencies.
+   * Launch the dashboard with pre-packaged RBI regulatory datasets ready for exploration.
 
 ---
 
 ## 1. Project Overview
 
-**ReguLens** is an open-source, fullstack regulatory intelligence platform designed for compliance officers, fintech risk managers, and financial analysts. It solves the critical problem of navigating voluminous Reserve Bank of India (RBI) Master Directions, circulars, and amendments by combining:
+**ReguLens** is an open-source regulatory intelligence platform designed for fintech compliance officers, risk managers, and financial analysts. It solves the critical problem of navigating voluminous Reserve Bank of India (RBI) Master Directions, circulars, and amendments by combining:
 
 1. **Strictly Grounded Regulatory Q&A:** A Retrieval-Augmented Generation (RAG) engine that answers inquiries *only* using retrieved regulatory text, enforcing zero-hallucination refusals and verifiable page citations.
 2. **Regulatory Change Intelligence & Diffing:** A sequence-matching engine that inspects two versions of a regulatory document, categorizing differences into **Additions**, **Removals**, and **Modifications** with side-by-side wording views.
 3. **Audit Traceability:** Retains exact page numbers, document titles, publication dates, and source URLs for every citation.
+4. **Cloud & Edge Readiness:** Runs seamlessly in both cloud environments (Streamlit Community Cloud, Docker) and local workstations with private on-prem LLMs (Ollama).
 
 ---
 
 ## 2. Problem Statement & Motivation
 
 Fintechs and regulated banks in India operate under frequent regulatory updates issued by the Reserve Bank of India across Master Directions, notifications, and amendment circulars. Reading through 100+ page legal documents manually introduces critical operational risks:
-- **Missed Compliance Mandates:** Subtle additions (such as Video-CIP requirements or periodic re-KYC timelines) are easily overlooked.
+- **Missed Compliance Mandates:** Subtle additions (such as Video-CIP requirements, FLDG contractual caps, or periodic re-KYC timelines) are easily overlooked.
 - **Hallucination Risk of Generic LLMs:** Public LLMs often invent regulatory circular numbers, assume outdated rules are valid, or provide legal interpretations without evidence.
 - **Wording vs Legal Impact Confusion:** Automated text tools often mistake formatting differences for legal changes. ReguLens strictly isolates textual diffs from verified legal conclusions.
 
@@ -32,13 +77,13 @@ Fintechs and regulated banks in India operate under frequent regulatory updates 
 - Ingests official PDF circulars and Master Directions.
 - Uses **Sentence Transformers** (`all-MiniLM-L6-v2`) and **FAISS** to retrieve top matching regulatory passages.
 - Evaluates cosine similarity against a configurable relevance threshold.
-- Generates precise, evidence-grounded answers via local **Ollama (`llama3.2:3b`)**.
+- Generates precise, evidence-grounded answers via local/remote **Ollama (`llama3.2:3b`)** or displays verbatim evidence passages.
 - Displays verified citations with origin page numbers, document IDs, and official RBI links.
 
 ### 🚫 Feature 2 — Zero-Hallucination Safe Fallback
 - If the retrieved evidence is insufficient or irrelevant, the system strictly outputs:
   > *"I couldn't find sufficient evidence in the selected documents."*
-- Operates in a **Retrieval-Only Mode** if local LLM generation is unavailable or offline, preventing server crashes.
+- Operates in a **Retrieval-Only Mode** if external LLM generation is unavailable or offline, preventing server crashes.
 
 ### ⚖️ Feature 3 — Regulatory Document Comparison & Diffing
 - Compares two documents or revisions using Python's `difflib.SequenceMatcher`.
@@ -49,7 +94,7 @@ Fintechs and regulated banks in India operate under frequent regulatory updates 
 - Embeds a mandatory legal disclaimer that textual differences are not definitive legal compliance certifications.
 
 ### 📊 Feature 4 — Evaluation & Benchmark Hub
-- Includes a live test runner for the 5 hackathon test cases.
+- Includes a live test runner for the 5 benchmark test cases.
 - Documents failure analysis (scanned raster PDFs, low-similarity circulars).
 
 ---
@@ -78,7 +123,7 @@ flowchart TD
         K -- No --> L["Fallback: 'I couldn't find sufficient evidence'"]
         K -- Yes --> M[Anti-Injection Prompt Formatter]
         M --> N{Ollama Online?}
-        N -- Yes --> O[Ollama llama3.2:3b Local LLM]
+        N -- Yes --> O[Ollama llama3.2:3b / Remote LLM]
         N -- No --> P[Retrieval-Only Evidence Mode]
     end
 
@@ -99,31 +144,43 @@ flowchart TD
 
 ## 5. Technology Stack
 
-| Layer | Technology | Rationale / Benefits |
-|---|---|---|
-| **Web Interface** | Streamlit | Lightweight, interactive dashboard with custom CSS |
-| **PDF Extraction** | PyMuPDF (`pymupdf`) | Fast, native C-based extraction preserving page boundaries |
-| **Embeddings** | Sentence Transformers (`all-MiniLM-L6-v2`) | Compact (80 MB), fast CPU inference, 384 dimensions |
-| **Vector Store** | FAISS (`faiss-cpu`) | High-performance exact Inner Product (Cosine Similarity) |
-| **Local LLM** | Ollama (`llama3.2:3b`) | 100% private, zero API cost, runs on CPU/laptop |
-| **Diff Engine** | Python standard `difflib` | Reliable sequence matching without heavy dependencies |
-| **Automated Testing** | `pytest` | 15 comprehensive unit & integration tests |
+| Layer | Technology | Streamlit Cloud Ready | Rationale / Benefits |
+|---|---|---|---|
+| **Web Interface** | Streamlit | ✅ Yes | Interactive reactive dashboard with custom CSS |
+| **PDF Extraction** | PyMuPDF (`pymupdf`) | ✅ Yes (via `packages.txt`) | Fast, native C-based extraction preserving page boundaries |
+| **Embeddings** | Sentence Transformers (`all-MiniLM-L6-v2`) | ✅ Yes | Compact (80 MB), fast CPU inference, 384 dimensions |
+| **Vector Store** | FAISS (`faiss-cpu`) | ✅ Yes (via `libgomp1`) | High-performance exact Inner Product (Cosine Similarity) |
+| **LLM Generation** | Ollama / Hybrid Fallback | ✅ Yes (Auto-fallback) | 100% private, zero API cost, seamless retrieval-only fallback |
+| **Diff Engine** | Python standard `difflib` | ✅ Yes | Reliable sequence matching without heavy dependencies |
+| **Automated Testing** | `pytest` | ✅ Yes | 15 comprehensive unit & integration tests |
 
 ---
 
 ## 6. Project Folder Structure
 
 ```text
-Fintech-RAG/
+ReguLens/
 ├── app.py                      # Fullstack Streamlit application
 ├── requirements.txt            # Minimal, verified project dependencies
+├── packages.txt                # Debian packages for Streamlit Cloud (libgomp1, curl)
 ├── README.md                   # Complete architectural and setup guide
-├── .gitignore                  # Excludes .venv, cache, and generated indices
+├── ReguLens_Implementation_Plan.md # Technical implementation plan
+├── Dockerfile                  # Containerized production deployment
+├── docker-compose.yml          # ReguLens + Ollama container orchestration
+├── .gitignore                  # Excludes .venv, cache, and indices
+├── .streamlit/
+│   └── config.toml             # Streamlit Cloud server & theme configuration
 ├── data/
-│   ├── raw/                    # Uploaded & synthetic sample RBI PDFs
+│   ├── raw/                    # Pre-packaged RBI PDFs (Digital Lending, FLDG, PA/PG, Credit Cards, KYC)
+│   │   ├── rbi_digital_lending_guidelines_2022.pdf
+│   │   ├── rbi_fldg_digital_lending_2023.pdf
+│   │   ├── rbi_payment_aggregators_directions.pdf
+│   │   ├── rbi_credit_card_directions_2022.pdf
 │   │   ├── synthetic_kyc_baseline_2016.pdf
 │   │   └── synthetic_kyc_revised_2023.pdf
 │   └── processed/              # FAISS indices, chunks, and metadata caches
+├── scripts/
+│   └── generate_more_documents.py # Programmatic generator for realistic RBI circulars
 ├── src/
 │   ├── __init__.py
 │   ├── document_loader.py      # PyMuPDF ingestion & page metadata tracking
@@ -143,99 +200,103 @@ Fintech-RAG/
 
 ---
 
-## 7. Windows PowerShell Installation Instructions
+## 7. Local Installation & Development
 
-Open PowerShell in the project directory:
+### Windows PowerShell
 
 ```powershell
-# 1. Navigate to project root
-cd c:\Users\StuDenT.DD.000\Downloads\Fintech-RAG
+# 1. Clone repository
+git clone https://github.com/JhenkarC-555/ReguLens.git
+cd ReguLens
 
-# 2. Verify installed Python version (Python 3.13 recommended)
-py -3.13 --version
-
-# 3. Create virtual environment
+# 2. Create and activate virtual environment (Python 3.11 - 3.13)
 py -3.13 -m venv .venv
-
-# 4. Activate virtual environment
 .\.venv\Scripts\Activate.ps1
 
-# 5. Install dependencies
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Generate synthetic regulatory PDF documents
+python scripts/generate_more_documents.py
+python tests/create_test_fixtures.py
+
+# 5. Start the Streamlit application
+streamlit run app.py
 ```
+
+### macOS / Linux
+
+```bash
+# 1. Clone repository
+git clone https://github.com/JhenkarC-555/ReguLens.git
+cd ReguLens
+
+# 2. Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Generate regulatory fixtures
+python scripts/generate_more_documents.py
+python tests/create_test_fixtures.py
+
+# 5. Run application
+streamlit run app.py
+```
+
+The web dashboard will open in your browser at `http://localhost:8501`.
 
 ---
 
-## 8. Instructions for Running the Application
+## 8. Docker & Container Deployment
 
-Ensure the virtual environment is activated:
+To run ReguLens alongside a containerized Ollama instance:
 
-```powershell
-# Start the Streamlit application
-.\.venv\Scripts\streamlit.exe run app.py
+```bash
+# Start both ReguLens and Ollama containers
+docker-compose up -d
+
+# Check running status
+docker-compose ps
 ```
 
-The web dashboard will open automatically in your browser at:
-`http://localhost:8501`
+Access the application at `http://localhost:8501`.
 
 ---
 
 ## 9. Instructions for Loading RBI Documents
 
-1. **Synthetic KYC Baseline & Revised Directions:**
-   Pre-loaded automatically in `data/raw/` for instant evaluation.
+1. **Pre-packaged Regulatory Library:**
+   ReguLens includes 6 curated regulatory circulars in `data/raw/`:
+   - RBI Digital Lending Guidelines (September 2022)
+   - RBI Default Loss Guarantee (FLDG) Framework (June 2023)
+   - RBI Master Direction on Payment Aggregators & Payment Gateways
+   - RBI Master Direction on Credit & Debit Card Issuance
+   - Synthetic KYC Baseline (2016)
+   - Synthetic KYC Revised Directions (2023)
 2. **Uploading Official RBI Documents:**
-   - Download the official KYC Master Direction or Circular from the [RBI Master Directions Portal](https://www.rbi.org.in/Scripts/BS_ViewMasterDirections.aspx?did=338).
+   - Download any official RBI circular or Master Direction from the [RBI Portal](https://www.rbi.org.in).
    - Use the sidebar **"Upload RBI Master Direction / Circular PDF"** file uploader.
-   - The application automatically extracts text, chunks pages, and updates the FAISS vector index.
+   - The application automatically extracts text, chunks pages, and updates the FAISS vector index in real-time.
 
 ---
 
-## 10. How to Use the Application
-
-### Workflow A: Ask Documents
-1. Navigate to the **"🔍 Ask Documents"** tab.
-2. Click any of the pre-configured sample question pills (e.g. *Officially Valid Documents (OVD)* or *Periodic KYC update timelines*), or type a custom question.
-3. Click **"🔍 Submit Inquiry"**.
-4. Inspect the generated answer, latency badge, and expandable **Verifiable Regulatory Citations** showing exact origin pages.
-5. Click **"🚫 Test Safe Fallback"** to test how ReguLens safely refuses an unsupported query without hallucinating.
-
-### Workflow B: Compare Documents
-1. Navigate to the **"⚖️ Compare Regulations"** tab.
-2. Select **Document A** (`synthetic_kyc_baseline_2016.pdf`) and **Document B** (`synthetic_kyc_revised_2023.pdf`).
-3. Click **"⚖️ Compare Documents"**.
-4. Review:
-   - **Overall Textual Similarity Metric** (e.g., 55% similarity).
-   - **Modifications Tab:** View original 2016 wording side-by-side with 2023 revised wording.
-   - **Additions Tab:** Highlights newly inserted clauses (e.g. Video-CIP live interaction mandates).
-   - **Removals Tab:** Deprecated clauses.
-
----
-
-## 11. Model Setup and Resource Requirements
-
-- **Embedding Model:** `sentence-transformers/all-MiniLM-L6-v2` (~80 MB storage, ~200 MB RAM). Runs on CPU in <15ms per query.
-- **Local LLM:** Ollama with `llama3.2:3b` (~2.0 GB storage, ~2.5 GB RAM).
-  ```powershell
-  # Verify Ollama is running
-  ollama list
-  # If needed, pull model:
-  ollama run llama3.2:3b
-  ```
-- **Fallback Capability:** If Ollama is paused or not running, ReguLens seamlessly engages **Retrieval-Only Mode**, displaying exact retrieved passages and metadata without interruption.
-
----
-
-## 12. Automated Test Suite
+## 10. Automated Test Suite
 
 To run the automated test suite:
 
-```powershell
-.\.venv\Scripts\pytest -v tests
+```bash
+pytest -v tests
 ```
 
 ### Test Results
 ```text
+============================= test session starts =============================
+platform win32 / linux -- pytest-9.1.1, pluggy-1.7.0
+collecting ... collected 15 items
+
 tests/test_document_compare.py::test_compare_identical_documents PASSED  [  6%]
 tests/test_document_compare.py::test_detect_additions_removals_modifications PASSED [ 13%]
 tests/test_document_compare.py::test_compare_documents_from_synthetic_pdfs PASSED [ 20%]
@@ -252,12 +313,12 @@ tests/test_text_processor.py::test_clean_text_preserves_regulatory_sections PASS
 tests/test_text_processor.py::test_chunk_preserves_page_numbers_and_metadata PASSED [ 93%]
 tests/test_text_processor.py::test_chunk_empty_document PASSED           [100%]
 
-============================= 15 passed in 7.70s ==============================
+============================= 15 passed in 6.97s ==============================
 ```
 
 ---
 
-## 13. Hackathon 5-Question Evaluation & Failure Analysis
+## 11. Benchmark Evaluation & Failure Analysis
 
 | ID | Test Type | Query | Expected & Actual Result | Grounding Status |
 |---|---|---|---|---|
@@ -273,27 +334,16 @@ tests/test_text_processor.py::test_chunk_empty_document PASSED           [100%]
 
 ---
 
-## 14. Limitations and Responsible-Use Disclaimer
+## 12. Limitations and Responsible-Use Disclaimer
 
 > **IMPORTANT LEGAL DISCLAIMER:**  
 > ReguLens is an informational and technological prototype developed for regulatory exploration and comparative analysis. It is **not** an official publication of the Reserve Bank of India and does **not** constitute legal, compliance, or financial advice. Textual differences identified by the system represent wording differences and should not be construed as verified regulatory amendments without independent legal review.
 
 ---
 
-## 15. Official RBI Data Sources
+## 13. Official RBI Data Sources
 
 - [RBI Master Directions Portal](https://www.rbi.org.in/Scripts/BS_ViewMasterDirections.aspx?did=338)
 - [RBI Circulars Index](https://www.rbi.org.in/scripts/BS_CircularIndexDisplay.aspx)
 - [RBI Notifications](https://www.rbi.org.in/Scripts/NotificationUser.aspx)
 - [RBI KYC Master Direction (Updated)](https://www.rbi.org.in/Scripts/BS_ViewMasterDirections.aspx?id=11566)
-
----
-
-## 16. User Interface Gallery
-
-| Feature | Interface Layout |
-|---|---|
-| **Grounded Ask Documents** | Natural language question bar, clickable sample questions, grounded LLM answer card, latency and model badge, expandable verified citations with page numbers. |
-| **Compare Regulations** | Side-by-side diff viewer with overall similarity gauge, separate tabs for Modifications, Additions, Removals, and full interactive HTML Sequence table. |
-| **Document Repository** | Extracted page viewer, character count metrics, OCR detector warnings, and metadata inspection. |
-| **Evaluation Hub** | 5-question benchmark execution table with latency and grounding audit log. |
